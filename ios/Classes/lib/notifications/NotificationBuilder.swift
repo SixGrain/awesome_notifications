@@ -223,13 +223,16 @@ public class NotificationBuilder {
             
             setUserInfoContent(pushNotification: pushNotification, content: content)
             
+            setAlert(pushNotification: pushNotification, channel: channel, content: content)
+            
             if SwiftUtils.isRunningOnExtension() {                
                 return pushNotification
             }
             
             let trigger:UNCalendarNotificationTrigger? = dateToCalendarTrigger(targetDate: nextDate)
             let request = UNNotificationRequest(identifier: pushNotification.content!.id!.description, content: content, trigger: trigger)
-            
+        
+        
             UNUserNotificationCenter.current().add(request)
             {
                 error in // called when message has been sent
@@ -479,6 +482,12 @@ public class NotificationBuilder {
         }
     }
     
+    private static func setAlert(pushNotification:PushNotification, channel:NotificationChannelModel, content:UNMutableNotificationContent){
+        if ((pushNotification.content!.presentAlert ?? true) == false) {
+            content.userInfo["presentAlert"] = false
+        }
+    }
+
     private static func setVibrationPattern(channel:NotificationChannelModel, content:UNMutableNotificationContent){
         // TODO
     }

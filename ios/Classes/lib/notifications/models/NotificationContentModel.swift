@@ -43,6 +43,7 @@ public class NotificationContentModel : AbstractModel {
     var displayedLifeCycle: NotificationLifeCycle?
     var createdDate: String?
     var displayedDate: String?
+    var presentAlert: Bool?
     
     public func fromMap(arguments: [String : Any?]?) -> AbstractModel? {
                 
@@ -79,6 +80,7 @@ public class NotificationContentModel : AbstractModel {
         self.displayedDate      = MapUtils<String>.getValueOrDefault(reference: "displayedDate", arguments: arguments)
         
         self.payload  = MapUtils<[String:String?]>.getValueOrDefault(reference: "payload", arguments: arguments)
+        self.presentAlert = MapUtils<Bool>.getValueOrDefault(reference: "presentAlert", arguments: arguments)
         
         if(arguments?["actionButtons"] != nil){
             

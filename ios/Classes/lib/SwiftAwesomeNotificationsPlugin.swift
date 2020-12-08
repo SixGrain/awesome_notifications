@@ -252,6 +252,7 @@ public class SwiftAwesomeNotificationsPlugin: NSObject, FlutterPlugin, UNUserNot
     private func receiveNotification(content:UNNotificationContent, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void){
         
         let jsonData:String? = content.userInfo[Definitions.NOTIFICATION_JSON] as? String
+        let presentAlert:Bool = (content.userInfo["presentAlert"] as? Bool) ?? true
         let pushNotification:PushNotification? = NotificationBuilder.jsonToPushNotification(jsonData: jsonData)
         
         if(pushNotification == nil){
@@ -292,9 +293,9 @@ public class SwiftAwesomeNotificationsPlugin: NSObject, FlutterPlugin, UNUserNot
         if(notificationReceived != nil){
                         
             let channel:NotificationChannelModel? = ChannelManager.getChannelByKey(channelKey: pushNotification!.content!.channelKey!)
-            
             alertOnlyOnceNotification(
-                channel?.onlyAlertOnce,
+                presentAlert,
+                alertOnce: channel?.onlyAlertOnce,
                 notificationReceived: notificationReceived!,
                 completionHandler: completionHandler
             )
@@ -325,7 +326,11 @@ public class SwiftAwesomeNotificationsPlugin: NSObject, FlutterPlugin, UNUserNot
     }
     
     @available(iOS 10.0, *)
-    private func alertOnlyOnceNotification(_ alertOnce:Bool?, notificationReceived:NotificationReceived, completionHandler: @escaping (UNNotificationPresentationOptions) -> Void){
+    private func alertOnlyOnceNotification(_ presentAlert: Bool, alertOnce:Bool?, notificationReceived:NotificationReceived, completionHandler: @escaping (UNNotificationPresentationOptions) -> Void){
+        var options: UNNotificationPresentationOptions = UNNotificationPresentationOptions.badge
+        if(presentAlert) {
+            options.insert(UNNotificationPresentationOptions.alert)
+        }
         
         if(alertOnce ?? false){
             
@@ -336,7 +341,7 @@ public class SwiftAwesomeNotificationsPlugin: NSObject, FlutterPlugin, UNUserNot
                         
                         self.shouldDisplay(
                             notificationReceived: notificationReceived,
-                            options: [.alert, .badge],
+                            options: options,
                             completionHandler: completionHandler
                         )
                         
@@ -346,10 +351,11 @@ public class SwiftAwesomeNotificationsPlugin: NSObject, FlutterPlugin, UNUserNot
             }
             
         }
+        options.insert(UNNotificationPresentationOptions.sound)
             
         self.shouldDisplay(
             notificationReceived: notificationReceived,
-            options: [.alert, .badge, .sound],
+            options: options,
             completionHandler: completionHandler
         )
     }

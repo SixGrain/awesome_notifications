@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 /// If notification has no [body] or [title], it will only be created, but not displayed to the user (background notification).
 class NotificationContent extends BaseNotificationContent {
   bool hideLargeIconOnExpand;
+  bool presentAlert;
   int progress;
   String ticker;
 
@@ -46,7 +47,8 @@ class NotificationContent extends BaseNotificationContent {
       this.createdLifeCycle,
       this.displayedLifeCycle,
       this.createdDate,
-      this.displayedDate})
+      this.displayedDate,
+      this.presentAlert})
       : super(
             id: id,
             channelKey: channelKey,
@@ -110,6 +112,7 @@ class NotificationContent extends BaseNotificationContent {
             AssertUtils.toSimpleEnumString(displayedLifeCycle),
         'createdDate': createdDate,
         'displayedDate': displayedDate,
+        'presentAlert': presentAlert,
       });
     return dataMap;
   }
