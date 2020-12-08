@@ -351,7 +351,9 @@ public class SwiftAwesomeNotificationsPlugin: NSObject, FlutterPlugin, UNUserNot
             }
             
         }
-        options.insert(UNNotificationPresentationOptions.sound)
+        if(presentAlert) {
+            options.insert(UNNotificationPresentationOptions.sound) 
+        }
             
         self.shouldDisplay(
             notificationReceived: notificationReceived,
