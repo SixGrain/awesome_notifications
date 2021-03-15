@@ -1,6 +1,7 @@
 import 'package:intl/intl.dart';
 
 class DateUtils {
+
   static DateTime parseStringToDate(String date,
       {String format: 'yyyy-MM-dd HH:mm:ss'}) {
     if (date == null || date.isEmpty) return null;
@@ -26,4 +27,5 @@ class DateUtils {
         DateFormat(format).parse(parseDateToString(date));
     return parsedLocalDate.toUtc();
   }
+
 }

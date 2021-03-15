@@ -13,8 +13,10 @@ class BaseNotificationContent extends Model {
   String summary;
   bool showWhen;
   Map<String, dynamic> payload;
+  String icon;
   String largeIcon;
   String bigPicture;
+  String customSound;
   bool autoCancel;
   Color color;
   Color backgroundColor;
@@ -27,12 +29,14 @@ class BaseNotificationContent extends Model {
     this.body,
     this.summary,
     this.showWhen,
+    this.icon,
     this.largeIcon,
     this.bigPicture,
     this.autoCancel,
     this.color,
     this.backgroundColor,
     this.payload,
+    this.customSound
   });
 
   @override
@@ -44,8 +48,10 @@ class BaseNotificationContent extends Model {
     this.summary = AssertUtils.extractValue<String>(mapData, 'summary');
     this.showWhen = AssertUtils.extractValue<bool>(mapData, 'showWhen');
     this.payload = AssertUtils.extractMap<String, dynamic>(mapData, 'payload');
+    this.icon = AssertUtils.extractValue<String>(mapData, 'icon');
     this.largeIcon = AssertUtils.extractValue<String>(mapData, 'largeIcon');
     this.bigPicture = AssertUtils.extractValue<String>(mapData, 'bigPicture');
+    this.customSound = AssertUtils.extractValue<String>(mapData, 'customSound');
     this.autoCancel = AssertUtils.extractValue<bool>(mapData, 'autoCancel');
     this.privacy = AssertUtils.extractEnum<NotificationPrivacy>(
         mapData, 'privacy', NotificationPrivacy.values);
@@ -70,9 +76,11 @@ class BaseNotificationContent extends Model {
       'body': body,
       'summary': summary,
       'showWhen': showWhen,
+      'icon': icon,
       'payload': payload,
       'largeIcon': largeIcon,
       'bigPicture': bigPicture,
+      'customSound': customSound,
       'autoCancel': autoCancel,
       'privacy': AssertUtils.toSimpleEnumString(privacy),
       'color': color?.value,

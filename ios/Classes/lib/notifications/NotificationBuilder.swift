@@ -217,7 +217,7 @@ public class NotificationBuilder {
             
             createActionButtonsAndCategory(pushNotification: pushNotification, content: content)
                     
-            applyGrouping(channel: channel, content: content)
+            setGrouping(channel: channel, content: content)
             
             pushNotification.content!.displayedDate = nextDate?.toString() ?? now
             
@@ -475,7 +475,25 @@ public class NotificationBuilder {
                 return
             }
             
-            content.sound = UNNotificationSound.default
+            // TODO Get default iOS path sounds
+            switch channel.defaultRingtoneType {
+                
+                case .Ringtone:
+                    content.sound = UNNotificationSound.default
+                    return
+                    
+                case .Alarm:
+                    content.sound = UNNotificationSound.default
+                    return
+                
+                case .Notification:
+                    content.sound = UNNotificationSound.default
+                    return
+                    
+                case .none:
+                    content.sound = UNNotificationSound.default
+                    return
+            }
         }
         else {
             content.sound = nil
@@ -508,9 +526,9 @@ public class NotificationBuilder {
         // TODO
     }
 
-    private static func applyGrouping(channel:NotificationChannelModel, content:UNMutableNotificationContent){
+    private static func setGrouping(channel:NotificationChannelModel, content:UNMutableNotificationContent){
         
-        if((channel.setAsGroupSummary ?? false) && (!StringUtils.isNullOrEmpty(channel.groupKey))){
+        if(!StringUtils.isNullOrEmpty(channel.groupKey)){
             content.threadIdentifier = channel.groupKey!
         }
     }
@@ -555,6 +573,8 @@ public class NotificationBuilder {
     
     private static func getAttatchmentFromBitmapSource(_ bitmapSource:String?) -> UNNotificationAttachment? {
         
+        //let dimensionLimit:CGFloat = 1038.0
+        		
         if !StringUtils.isNullOrEmpty(bitmapSource) {
             
             if let image:UIImage = BitmapUtils.getBitmapFromSource(bitmapPath: bitmapSource!) {
@@ -562,14 +582,16 @@ public class NotificationBuilder {
                 let fileManager = FileManager.default
                 let tmpSubFolderName = ProcessInfo.processInfo.globallyUniqueString
                 let tmpSubFolderURL = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(tmpSubFolderName, isDirectory: true)
+                
                 do {
                     try fileManager.createDirectory(at: tmpSubFolderURL, withIntermediateDirectories: true, attributes: nil)
                     let imageFileIdentifier = bitmapSource!.md5 + ".png"
                     let fileURL = tmpSubFolderURL.appendingPathComponent(imageFileIdentifier)
                     
-                    let imageData = UIImage.pngData(image)
-                    try imageData()?.write(to: fileURL)
-                    
+                    // JPEG is more memory efficient, but switches trasparency by white color
+                    let imageData = image.pngData()//.jpegData(compressionQuality: 0.9)//
+                    try imageData?.write(to: fileURL)
+                                        
                     let imageAttachment = try UNNotificationAttachment.init(identifier: imageFileIdentifier, url: fileURL, options: nil)
                     return imageAttachment
                     
@@ -588,7 +610,7 @@ public class NotificationBuilder {
             
             if let attachment:UNNotificationAttachment = getAttatchmentFromBitmapSource(pushNotification.content?.bigPicture) {
                 content.attachments.append(attachment)
-                //	return
+                return
             }
         }
         

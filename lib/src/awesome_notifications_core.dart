@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:awesome_notifications/src/definitions.dart';
 import 'package:awesome_notifications/src/enumerators/media_source.dart';
 import 'package:awesome_notifications/src/models/notification_button.dart';
@@ -130,7 +131,7 @@ class AwesomeNotifications {
 
     _channel.setMethodCallHandler(_handleMethod);
 
-    List<dynamic> serializedChannels = List();
+    List<dynamic> serializedChannels = [];
     for (NotificationChannel channel in channels) {
       serializedChannels.add(channel.toMap());
     }
@@ -263,7 +264,7 @@ class AwesomeNotifications {
 
   /// List all active scheduled notifications.
   Future<List<PushNotification>> listScheduledNotifications() async {
-    List<PushNotification> scheduledNotifications = List<PushNotification>();
+    List<PushNotification> scheduledNotifications = [];
     List<Object> returned =
         await _channel.invokeListMethod(CHANNEL_METHOD_LIST_ALL_SCHEDULES);
     for (Object object in returned) {
@@ -273,7 +274,7 @@ class AwesomeNotifications {
               PushNotification().fromMap(Map<String, dynamic>.from(object));
           scheduledNotifications.add(pushNotification);
         } catch (e) {
-          return List<PushNotification>();
+          return [];
         }
       }
     }
@@ -281,9 +282,17 @@ class AwesomeNotifications {
   }
 
   /// Set a new notification channel or updates if already exists
-  Future<void> setChannel(NotificationChannel notificationChannel) async {
-    await _channel.invokeMethod(
-        CHANNEL_METHOD_SET_NOTIFICATION_CHANNEL, notificationChannel.toMap());
+  /// [forceUpdate]: completely updates the channel on Android Oreo and above, but cancels all current notifications.
+  Future<void> setChannel(NotificationChannel notificationChannel, {bool forceUpdate}) async {
+
+    Map<String, dynamic> parameters =  notificationChannel.toMap();
+    parameters.addAll(
+        {
+          CHANNEL_FORCE_UPDATE: forceUpdate
+        }
+    );
+
+    await _channel.invokeMethod( CHANNEL_METHOD_SET_NOTIFICATION_CHANNEL, parameters );
   }
 
   /// Remove a notification channel
@@ -315,6 +324,18 @@ class AwesomeNotifications {
   /// Resets the badge counter
   Future<void> resetGlobalBadge() async {
     await _channel.invokeListMethod(CHANNEL_METHOD_RESET_BADGE);
+  }
+
+  Future<DateTime> getNextDate(NotificationSchedule schedule, {DateTime fixedDate}) async {
+    Map parameters = {
+      NOTIFICATION_INITIAL_FIXED_DATE: DateUtils.parseDateToString(fixedDate),
+      PUSH_NOTIFICATION_SCHEDULE: schedule.toMap()
+    };
+
+    final String nextDate =
+      await _channel.invokeMethod(CHANNEL_METHOD_GET_NEXT_DATE, parameters);
+
+    return DateUtils.parseStringToDate(nextDate);
   }
 
   /// Cancel a single notification

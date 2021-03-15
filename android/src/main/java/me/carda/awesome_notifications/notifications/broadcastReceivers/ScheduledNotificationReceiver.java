@@ -5,7 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.widget.Toast;
 
-import com.google.common.reflect.TypeToken;
+//import com.google.common.reflect.TypeToken;
 
 import me.carda.awesome_notifications.Definitions;
 import me.carda.awesome_notifications.notifications.models.PushNotification;
@@ -24,7 +24,7 @@ public class ScheduledNotificationReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(final Context context, Intent intent) {
 
-        Toast.makeText(context, "ScheduledNotificationReceiver", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(context, "ScheduledNotificationReceiver", Toast.LENGTH_SHORT).show();
 
         String notificationDetailsJson = intent.getStringExtra(Definitions.NOTIFICATION_JSON);
         if (!StringUtils.isNullOrEmpty(notificationDetailsJson)) {

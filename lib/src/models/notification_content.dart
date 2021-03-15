@@ -20,20 +20,25 @@ class NotificationContent extends BaseNotificationContent {
 
   NotificationLayout notificationLayout;
 
+  bool displayOnForeground;
+  bool displayOnBackground;
+
   String createdDate;
   String displayedDate;
 
   bool locked;
 
-  NotificationContent(
-      {int id,
+  NotificationContent({
+      int id,
       String channelKey,
       String title,
       String body,
       String summary,
       bool showWhen,
+      String icon,
       String largeIcon,
       String bigPicture,
+      String customSound,
       bool autoCancel,
       Color color,
       Color backgroundColor,
@@ -47,8 +52,10 @@ class NotificationContent extends BaseNotificationContent {
       this.createdLifeCycle,
       this.displayedLifeCycle,
       this.createdDate,
-      this.displayedDate,
-      this.presentAlert})
+      this.presentAlert,
+      this.displayOnForeground,
+      this.displayOnBackground,
+      this.displayedDate})
       : super(
             id: id,
             channelKey: channelKey,
@@ -57,8 +64,10 @@ class NotificationContent extends BaseNotificationContent {
             summary: summary,
             showWhen: showWhen,
             payload: payload,
+            icon: icon,
             largeIcon: largeIcon,
             bigPicture: bigPicture,
+            customSound: customSound,
             autoCancel: autoCancel,
             color: color,
             backgroundColor: backgroundColor);
@@ -85,6 +94,10 @@ class NotificationContent extends BaseNotificationContent {
         mapData, 'createdLifeCycle', NotificationLifeCycle.values);
 
     this.createdDate = AssertUtils.extractValue<String>(mapData, 'createdDate');
+
+    this.displayOnForeground = AssertUtils.extractValue<bool>(mapData, 'displayOnForeground');
+    this.displayOnBackground = AssertUtils.extractValue<bool>(mapData, 'displayOnBackground');
+
     this.displayedDate =
         AssertUtils.extractValue<String>(mapData, 'displayedDate');
 
@@ -110,6 +123,8 @@ class NotificationContent extends BaseNotificationContent {
         'createdLifeCycle': AssertUtils.toSimpleEnumString(createdLifeCycle),
         'displayedLifeCycle':
             AssertUtils.toSimpleEnumString(displayedLifeCycle),
+        'displayOnForeground': displayOnForeground,
+        'displayOnBackground': displayOnBackground,
         'createdDate': createdDate,
         'displayedDate': displayedDate,
         'presentAlert': presentAlert,

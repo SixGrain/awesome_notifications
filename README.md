@@ -421,10 +421,28 @@ Images can be defined using 4 prefix types:
 - Resource: images access through drawable native resources. On Android, those files are stored inside [project]/android/app/src/main/drawabe folder. **Example**: resource://drawable/res_image-asset.png
 
 OBS: Unfortunately, icons and sounds can be only resource media types.
+<br>
 OBS 2: To protect your native resources on Android against minification, please include the prefix "res_" in your resource file names. The use of the tag `shrinkResources false` inside build.gradle or the command `flutter build apk --no-shrink` is not recommended.
 To know more about it, please visit [Shrink, obfuscate, and optimize your app](https://developer.android.com/studio/build/shrink-code)
+<br>
+
+
+### Notification Importance (Android's channel)
+
+Defines the notification's importance level and how it should be displayed to the user.
+The possible importance levels are the following:
+
+- Max: Makes a sound and appears as a heads-up notification.
+- Higher: shows everywhere, makes noise and peeks. May use full screen intents.
+- Default: shows everywhere, makes noise, but does not visually intrude.
+- Low: Shows in the shade, and potentially in the status bar (see shouldHideSilentStatusBarIcons()), but is not audibly intrusive.
+- Min: only shows in the shade, below the fold.
+- None: disable the respective channel.
+
+OBS: Unfortunately, the channel's importance can only be defined on first time. After that, it cannot be changed.
 
 <br>
+
 
 ### Notification Action Button Types
 
@@ -517,7 +535,7 @@ OBS 2: you should not implement any native code to use FCM with Awesome Notifica
             "title": "Huston!\nThe eagle has landed!",
             "body": "A small step for a man, but a giant leap to Flutter's community!",
             "notificationLayout": "BigPicture",
-            "largeIcon": "https://avidabloga.files.wordpress.com/2012/08/emmemc3b3riadeneilarmstrong3.jpg",
+            "largeIcon": "https://media.fstatic.com/kdNpUx4VBicwDuRBnhBrNmVsaKU=/full-fit-in/290x478/media/artists/avatar/2013/08/neil-i-armstrong_a39978.jpeg",
             "bigPicture": "https://www.dw.com/image/49519617_303.jpg",
             "showWhen": true,
             "autoCancel": true,
@@ -549,11 +567,45 @@ OBS 2: you should not implement any native code to use FCM with Awesome Notifica
 You can download a example of how to send Push Notifications through FCM using "Postman" [here](https://raw.githubusercontent.com/rafaelsetragni/awesome_notifications/master/example/assets/readme/Firebase_FCM_Example.postman_collection.json)
 
 <br>
+<br>
 
-## Error: "Invalid notification content"
+## Notification channels
+<br>
 
-The notification sent via FCM services *MUST* respect the types of the respective Notification elements. Otherwise, your notification will be discarded as invalid one.
-Also, all the payload elements *MUST* be a String, as the same way as you do in Local Notifications using dart code.
+Notification channels are means by which notifications are send, defining the characteristics that will be common among all notifications on that same channel.
+A notification can be created, deleted and updated at any time in the application, however it is required that at least one exists during the initialization of this plugin. If a notification is created using a invalid channel key, the notification is discarded.
+After a notification being created, especially for Android Oreo devices and above, most of his definitions cannot be updated any more. To update all channel's definitions, it is necessary to use the ´forceUpdate´ option, which has the negative effect of automatically closing all active notifications on that channel.
+
+Main methods to manipulate a notification channel:
+
+* AwesomeNotifications().setChannel: Create or update a notification channel.
+* AwesomeNotifications().removeChannel: Remove a notification channel, closing all current notifications on that same channel.
+
+<br>
+
+| Attribute          	| Required | Description                                                              | Type                   | Updatable without force mode | Value Limits             | Default value             |
+| --------------------- | -------- | ------------------------------------------------------------------------ | ---------------------- | ---------------------------- | ------------------------ | ------------------------- |
+| channelKey 		 	|    YES   | String key that identifies a channel where not                           | String                 |          NOT AT ALL          | channel must be enabled  | basic_channel             |
+| channelName    	 	|    YES   | The title of the channel (is visible for the user on Android)            | String                 |             YES              | unlimited                |                           |
+| channelDescription    |    YES   | The channel description (is visible for the user on Android)             | String                 |             YES              | unlimited                |                           |
+| channelShowBadge	    |    NO    | The notification should automatically increment the badge counter        | bool                   |             YES              | true or false            | false                     |
+| importance     	    |    NO    | The notification should automatically increment the badge counter        | NotificationImportance |             NO               | Enumerator               | Normal                    |
+| playSound     	    |    NO    | Determines if the notification should play sound                         | bool                   |             NO               | true or false            | true                      |
+| soundSource     	    |    NO    | Specify a custom sound to be played (must be a native resource file)     | String                 |             NO               | unlimited                |                           |
+| defaultRingtoneType   |    NO    | Determines what default sound type should be played (only for Android)   | DefaultRingtoneType    |             YES              | Enumerator               | Notification              |
+| enableVibration       |    NO    | Activate / deactivate the vibration functionality                        | bool                   |             NO               | true or false            | true                      |
+| enableLights          |    NO    | Determines that the LED lights should be on in notifications             | bool                   |             NO               | true or false            | true                      |
+| ledColor              |    NO    | Determines the LED lights color to be played on notifications            | Color                  |             NO               | unlimited                | Colors.white              |
+| ledOnMs               |    NO    | Determines the time, in milliseconds, that the LED lights must be on     | int                    |             NO               | 1 - 2.147.483.647        |                           |
+| ledOffMs              |    NO    | Determines the time, in milliseconds, that the LED lights must be off    | int                    |             NO               | 1 - 2.147.483.647        |                           |
+| groupKey              |    NO    | Determines the common key used to group notifications in a compact form  | String                 |             NO               | unlimited                |                           |
+| groupSort             |    NO    | Determines the notifications sort order inside the grouping              | GroupSort              |             NO               | Enumerator               | Desc                      |
+| groupAlertBehavior    |    NO    | Determines the alert type for notifications in same grouping             | GroupAlertBehavior     |             NO               | Enumerator               | All                       |
+| defaultPrivacy        |    NO    | Determines the privacy level to be applied when the device is locked     | NotificationPrivacy    |             NO               | Enumerator               | Private                   |
+| icon                  |    NO    | Determines the notification small top icon on status bar                 | String                 |             NO               | unlimited                |                           |
+| defaultColor          |    NO    | Determines the notification global color (only for Android)              | Color                  |             NO               | unlimited                | Color.black               |
+| locked                |    NO    | Determines if the user cannot manually dismiss the notification          | bool                   |             NO               | true or false            | false                     |
+| onlyAlertOnce         |    NO    | Determines if the notification should alert once, when created           | bool                   |             NO               | true or false            | false                     |
 
 <br>
 <br>
@@ -561,28 +613,32 @@ Also, all the payload elements *MUST* be a String, as the same way as you do in 
 ## Notification types, values and defaults
 <br>
 
+
 ### NotificationContent ("content" in Push data) - (required)
 <br>
 
-| Attribute          	| Required | Description                                                              | Type                  | Value Limits            | Default value             |
-| --------------------- | -------- | ------------------------------------------------------------------------ | --------------------- | ----------------------- | ------------------------- |
-| id 			     	|    YES   | Number that identifies a unique notification                             | int                   | 1 - 2.147.483.647       | -1                        |
-| channelKey 		 	|    YES   | String key that identifies a channel where not. will be displayed        | String                | channel must be enabled | basic_channel             |
-| title 			 	|     NO   | The title of notification                                                | String                | unlimited               |                           |
-| body 			 	    |     NO   | The body content of notification                                         | String                | unlimited               |                           |
-| summary 		 	    |     NO   | A summary to be displayed when the content is protected by privacy       | String                | unlimited               |                           |
-| showWhen 		 	    |     NO   | Hide/show the time elapsed since notification was displayed              | bool                  | true or false           | true                      |
-| largeIcon 		 	|     NO   | Large icon displayed at right middle of compact notification             | String                | unlimited               |                           |
-| bigPicture 		 	|     NO   | Big image displayed on expanded notification                             | String                | unlimited               |                           |
-| autoCancel 		 	|     NO   | Notification should auto cancel when gets tapped by the user             | bool                  | true or false           | true                      |
-| color 			 	|     NO   | Notification text color                                                  | Color                 | 0x00000000 to 0xFFFFFFFF| 0xFF000000 (Colors.black) |
-| backgroundColor  	    |     NO   | Notification background color                                            | Color                 | 0x00000000 to 0xFFFFFFFF| 0xFFFFFFFF (Colors.white) |
-| payload 		 	    |     NO   | Hidden payload content                                                   | Map<String, String>   | Only String for values  | null                      |
-| notificationLayout	|     NO   | Layout type of notification                                              | Enumerator            | NotificationLayout      | Default                   |
-| hideLargeIconOnExpand |     NO   | Hide/show the large icon when notification gets expanded                 | bool                  | true or false           | false                     |
-| locked 			    |     NO   | Blocks the user to dismiss the notification                              | bool                  | true or false           | false                     |
-| progress 			    |     NO   | Current value of progress bar (percentage). Null for indeterminate.      | int                   | 0 - 100                 | null                      |
-| ticker 			    |     NO   | Text to be displayed on top of the screen when a notification arrives    | String                | unlimited               |                           |
+| Attribute          	| Required | Description                                                              | Type                  | Value Limits             | Default value             |
+| --------------------- | -------- | ------------------------------------------------------------------------ | --------------------- | ------------------------ | ------------------------- |
+| id 			     	|    YES   | Number that identifies a unique notification                             | int                   | 1 - 2.147.483.647        | -1                        |
+| channelKey 		 	|    YES   | String key that identifies a channel where not. will be displayed        | String                | channel must be enabled  | basic_channel             |
+| title 			 	|     NO   | The title of notification                                                | String                | unlimited                |                           |
+| body 			 	    |     NO   | The body content of notification                                         | String                | unlimited                |                           |
+| summary 		 	    |     NO   | A summary to be displayed when the content is protected by privacy       | String                | unlimited                |                           |
+| showWhen 		 	    |     NO   | Hide/show the time elapsed since notification was displayed              | bool                  | true or false            | true                      |
+| displayOnForeground   |     NO   | Hide/show the notification if the app is in the Foreground (streams are preserved )  | bool      | true or false            | true                      |
+| displayOnBackground   |     NO   | Hide/show the notification if the app is in the Background (streams are preserved )  | bool      | true or false            | true                      |
+| icon 		            |     NO   | Small icon to be displayed on the top of notification (Android only)     | String                | must be a resource image |                           |
+| largeIcon 		 	|     NO   | Large icon displayed at right middle of compact notification             | String                | unlimited                |                           |
+| bigPicture 		 	|     NO   | Big image displayed on expanded notification                             | String                | unlimited                |                           |
+| autoCancel 		 	|     NO   | Notification should auto cancel when gets tapped by the user             | bool                  | true or false            | true                      |
+| color 			 	|     NO   | Notification text color                                                  | Color                 | 0x00000000 to 0xFFFFFFFF | 0xFF000000 (Colors.black) |
+| backgroundColor  	    |     NO   | Notification background color                                            | Color                 | 0x00000000 to 0xFFFFFFFF | 0xFFFFFFFF (Colors.white) |
+| payload 		 	    |     NO   | Hidden payload content                                                   | Map<String, String>   | Only String for values   | null                      |
+| notificationLayout	|     NO   | Layout type of notification                                              | Enumerator            | NotificationLayout       | Default                   |
+| hideLargeIconOnExpand |     NO   | Hide/show the large icon when notification gets expanded                 | bool                  | true or false            | false                     |
+| locked 			    |     NO   | Blocks the user to dismiss the notification                              | bool                  | true or false            | false                     |
+| progress 			    |     NO   | Current value of progress bar (percentage). Null for indeterminate.      | int                   | 0 - 100                  | null                      |
+| ticker 			    |     NO   | Text to be displayed on top of the screen when a notification arrives    | String                | unlimited                |                           |
 
 <br>
 <br>
@@ -617,4 +673,64 @@ Also, all the payload elements *MUST* be a String, as the same way as you do in 
 | allowWhileIdle     |     NO   | Displays the notification, even when the device is low battery    | bool                               | true or false           | false           |
 | preciseSchedule    |   *YES   | List of precise notification fire dates                           | List<String> (YYYY-mm-dd HH:mi:ss) | UTC valid dates         |                 |
 
+<br>
+<br>
 
+## Common Known Issues
+
+**Issue:** The name 'DateUtils' is defined in the libraries 'package:awesome_notifications/src/utils/date_utils.dart (via package:awesome_notifications/awesome_notifications.dart)' and 'package:flutter/src/material/date.dart (via package:flutter/material.dart)'.
+
+**Fix:** Use a prefix while importing or hide one of the DateUtils declarations:
+
+```dart
+import 'package:flutter/material.dart' hide DateUtils;
+import 'package:flutter/material.dart' as Material show DateUtils;
+
+DateUtils.utcToLocal(DateTime.now());
+Material.DateUtils.dateOnly(DateTime.now());
+```
+
+##
+
+**Issue:** Undefined symbols for architecture arm64/armv7
+
+**Fix:** XCode, to reduce the debug build time, only compiles for the current target architecure. For some reason, when you try to build on release and profile mode without clean your project, XCode tries to reuse those base libraries and fails because of their lack of other architectures.
+
+Try to clean up your project in XCode (⇧ + ⌘ + K) and try to clean up your flutter project (flutter clean) to ensure that all debug files are not reusable in other enviroments.
+<br>
+
+##
+
+**Issue:** So, because myApp depends on both awesome_notifications and intl from sdk, version solving failed. pub get failed
+
+**Fix:** The awesome_notifications plugin must be limited to all other last plugin versions in the stable bracket, to be the most compatible as possible to any flutter application in production stage.
+Because of it, this issue could happen if you are creating a application using another bracket, such as beta one.
+But you can manually upgrade those dependencies into your local files. Just change the pubspec.yaml inside your awesome_notifications local folder and you should be ready to go.
+
+To see an example of how to solve it, please go to https://github.com/rafaelsetragni/awesome_notifications/issues/49
+<br>
+
+##
+
+**Issue:** Invalid notification content
+
+**Fix:** The notification sent via FCM services *MUST* respect the types of the respective Notification elements. Otherwise, your notification will be discarded as invalid one.
+Also, all the payload elements *MUST* be a String, as the same way as you do in Local Notifications using dart code.
+
+To see more information about each type, please go to https://github.com/rafaelsetragni/awesome_notifications#notification-types-values-and-defaults
+<br>
+
+##
+
+**Issue:** Undefined symbol: OBJC_CLASS$_FlutterStandardTypedData / OBJC_CLASS$_FlutterError / OBJC_CLASS$_FlutterMethodChannel
+
+**Fix:** That happens because your ios folder was created on a older flutter version, and now it will not work on new one. You unfortunately need to do the following steps:
+
+ * Update your Cocoa Pod installation with `sudo gem install cocoapods`
+ * Update your Flutter directory with `flutter upgrade`
+ * **Save every** personal modification inside your iOS folder and **delete it**.
+ * Recreate the iOS folder using the command `flutter create .`
+ * Clean your project with `flutter clean`
+ * Redo all the previous personal modification that you made inside your old iOS folder. To help you with this plugin, please follow the steps in [iOS Extra Configuration's Readme topic](https://github.com/rafaelsetragni/awesome_notifications#ios-extra-configurations)
+
+ Yes, is pretty bad. But that happens often while we are working with iOS products, because they are "Apple" and they do "Apple things". They constantly keep the effort to make the "non native developers" lives worst, every day.
